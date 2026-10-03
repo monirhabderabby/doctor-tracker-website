@@ -3,8 +3,8 @@
 Modern admin web app for **Doctor Tracker**, built with Next.js. Admins can manage doctors and their patients and read live analytics on a dashboard.
 
 - Backend repository: `https://github.com/monirhabderabby/doctor-tracker-backend`
-- Live app: `https://careguide.trustcheckbd.com`
-- Live API: `https://careguideapi.trustcheckbd.com/api`
+- Live app: `https://careguide.monirhrabby.com`
+- Live API: `https://careguideapi.monirhrabby.com/api`
 
 ---
 
