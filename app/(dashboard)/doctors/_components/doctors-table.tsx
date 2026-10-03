@@ -1,225 +1,223 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { Input } from "@/components/ui/input";
-import { getApiErrorMessage } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, memo } from "react";
+import Link from "next/link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
-  type OnChangeFn,
-  type PaginationState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { CircleOff, Loader2, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { doctorColumnLabels, doctorsColumns, type DoctorRow } from "./column";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
+import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
+import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
+import { useDoctorSpecializations } from "@/hooks/use-tracker";
+import {
+  ColorBadge,
+  DateRangeFilter,
+  EmptyState,
+  ErrorState,
+  InitialsAvatar,
+  Pagination,
+  SearchInput,
+  SelectField,
+  TableSkeleton,
+  formatDate,
+} from "@/components/ui/tracker-shared";
+import { useUrlFilters } from "@/hooks/use-url-filters";
+import { sortOptions } from "@/lib/constants";
+import { doctorsColumns, doctorColumnLabels, type DoctorRow } from "./column";
 import { doctorsQueryOptions } from "./get-doctors-client";
+import DoctorRowAction from "./doctor-row-action";
 
 const emptyDoctors: DoctorRow[] = [];
 
 export default function DoctorsTable() {
-  const [search, setSearch] = useState("");
-  const [request, setRequest] = useState({ query: "", pageIndex: 0 });
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setRequest((current) =>
-        current.query === search.trim()
-          ? current
-          : { query: search.trim(), pageIndex: 0 },
-      );
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  const {
-    data: response,
-    isPending,
-    isFetching,
-    isError,
-    error,
-    refetch,
-  } = useQuery(
-    doctorsQueryOptions({
-      query: request.query,
-      page: request.pageIndex + 1,
-    }),
-  );
-  const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {
-    setRequest((current) => {
-      const previous = { pageIndex: current.pageIndex, pageSize: 20 };
-      const next = typeof updater === "function" ? updater(previous) : updater;
-      return { ...current, pageIndex: next.pageIndex };
-    });
-  };
-
-  return (
-    <TableContainer
-      data={isError ? emptyDoctors : (response?.data ?? emptyDoctors)}
-      columns={doctorsColumns}
-      totalItems={response?.meta.total ?? 0}
-      pagination={{ pageIndex: request.pageIndex, pageSize: 20 }}
-      onPaginationChange={onPaginationChange}
-      search={search}
-      onSearchChange={setSearch}
-      loading={isPending}
-      busy={isFetching || search.trim() !== request.query}
-      error={isError ? getApiErrorMessage(error) : undefined}
-      onRetry={() => {
-        void refetch();
-      }}
-      onFirstPage={() =>
-        setRequest((current) => ({ ...current, pageIndex: 0 }))
-      }
-    />
-  );
-}
-
-interface TableContainerProps {
-  data: DoctorRow[];
-  columns: ColumnDef<DoctorRow>[];
-  totalItems: number;
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
-  search: string;
-  onSearchChange: (value: string) => void;
-  loading: boolean;
-  busy: boolean;
-  error?: string;
-  onRetry: () => void;
-  onFirstPage: () => void;
-}
-
-function TableContainer({
-  data,
-  columns,
-  totalItems,
-  pagination,
-  onPaginationChange,
-  search,
-  onSearchChange,
-  loading,
-  busy,
-  error,
-  onRetry,
-  onFirstPage,
-}: TableContainerProps) {
-  "use no memo"; // TanStack Table v8 exposes a mutable table instance.
+  "use no memo";
+  const { filters, update, clear, active } = useUrlFilters("doctors");
+  const query = useQuery(doctorsQueryOptions(filters));
+  const specializations = useDoctorSpecializations();
+  const client = useQueryClient();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  // eslint-disable-next-line react-hooks/incompatible-library -- This v8 table component explicitly opts out of compiler memoization above.
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 exposes a mutable table instance.
   const table = useReactTable({
-    data,
-    columns,
+    data: query.data?.data ?? emptyDoctors,
+    columns: doctorsColumns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     manualPagination: true,
     manualFiltering: true,
-    // The API owns ordering. Do not sort only the currently loaded 20 rows.
     enableSorting: false,
-    rowCount: totalItems,
-    onPaginationChange,
+    rowCount: query.data?.meta.total ?? 0,
     onColumnVisibilityChange: setColumnVisibility,
-    state: { pagination, columnVisibility },
+    state: {
+      pagination: { pageIndex: filters.page - 1, pageSize: filters.limit },
+      columnVisibility,
+    },
   });
-
-  const emptyMessage = loading ? (
-    <div
-      className="flex items-center justify-center gap-2 text-muted-foreground"
-      role="status"
-    >
-      <Loader2 className="size-4 animate-spin" /> Loading doctors…
-    </div>
-  ) : error ? (
-    <div className="flex flex-col items-center gap-2 py-5" role="alert">
-      <CircleOff className="size-5 text-muted-foreground" />
-      <p>{error}</p>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={busy}
-        onClick={onRetry}
-      >
-        Try again
-      </Button>
-    </div>
-  ) : (
-    <div className="space-y-2 py-5">
-      <p>
-        {search.trim() ? "No doctors match your search." : "No doctors found."}
-      </p>
-      {pagination.pageIndex > 0 ? (
-        <Button type="button" variant="outline" size="sm" onClick={onFirstPage}>
-          Back to first page
-        </Button>
-      ) : (
-        search.trim() && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onSearchChange("")}
-          >
-            Clear search
-          </Button>
-        )
-      )}
-    </div>
-  );
+  const totalPages = query.data?.meta.totalPages ?? 0;
+  const placeholder = query.isPlaceholderData;
+  useEffect(() => {
+    if (!placeholder && filters.page < totalPages)
+      void client.prefetchQuery(
+        doctorsQueryOptions({ ...filters, page: filters.page + 1 }),
+      );
+    if (!placeholder && query.data && filters.page > Math.max(1, totalPages))
+      update({ page: Math.max(1, totalPages) });
+  }, [client, filters, totalPages, placeholder, query.data, update]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="relative w-full max-w-75">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+    <section
+      className="overflow-hidden rounded-xl border bg-card shadow-sm"
+      aria-label="Doctors directory"
+    >
+      <div className="flex flex-wrap items-end gap-4 p-5">
+        <div className="w-full sm:w-80">
+          <SearchInput
+            label="Search doctors, hospitals…"
+            value={filters.search}
+            onChange={(search) => update({ search })}
           />
-          <Input
-            aria-label="Search doctors"
-            placeholder="Search doctors…"
-            maxLength={200}
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            className="h-9 pl-9 pr-9"
+        </div>
+        <div className="flex max-w-full flex-col gap-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            Specialization
+          </span>
+          <DataTableFacetedFilter
+            title="Specialization"
+            options={specializations.data ?? []}
+            value={filters.specialization ? [filters.specialization] : []}
+            onValueChange={(values) =>
+              update({ specialization: values[0] ?? "" })
+            }
+            singleSelect
+            disabled={specializations.isPending || specializations.isError}
           />
-          {search && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Clear search"
-              onClick={() => onSearchChange("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2"
-            >
-              <X className="size-3.5" />
+        </div>
+        <DateRangeFilter
+          from={filters.from}
+          to={filters.to}
+          onChange={update}
+        />
+        <SelectField
+          label="Sort by"
+          value={filters.sort}
+          onChange={(value) => update({ sort: value as typeof filters.sort })}
+          options={sortOptions}
+        />
+      </div>
+      {specializations.isError && (
+        <div role="alert" className="px-5 pb-3 text-sm text-destructive">
+          Unable to load specializations.{" "}
+          <Button variant="link" onClick={() => void specializations.refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-3 px-5 pb-4">
+        <p role="status" className="text-xs text-muted-foreground">
+          {query.isFetching
+            ? "Updating directory…"
+            : `${query.data?.meta.total ?? 0} doctors in your network`}
+        </p>
+        <div className="flex items-center gap-2">
+          {active && (
+            <Button variant="ghost" size="sm" onClick={clear}>
+              Clear filters
             </Button>
           )}
+          <span className="hidden lg:block">
+            <DataTableViewOptions table={table} labels={doctorColumnLabels} />
+          </span>
         </div>
-        <DataTableViewOptions table={table} labels={doctorColumnLabels} />
       </div>
-      <div aria-busy={busy}>
-        <DataTable
-          table={table}
-          columns={columns}
-          emptyMessage={emptyMessage}
+      {query.isPending ? (
+        <TableSkeleton />
+      ) : query.isError ? (
+        <ErrorState error={query.error} retry={() => void query.refetch()} />
+      ) : !query.data.data.length ? (
+        <EmptyState
+          title={
+            active ? "No matching doctors" : "Your care network starts here"
+          }
+          description={
+            active
+              ? "Try another search or clear your filters."
+              : "Use Add Doctor to introduce your first doctor."
+          }
+          action={
+            active ? (
+              <Button variant="outline" onClick={clear}>
+                Clear filters
+              </Button>
+            ) : undefined
+          }
         />
-      </div>
-      <span className="sr-only" role="status">
-        {busy ? "Updating doctors…" : `${totalItems} doctors found`}
-      </span>
-      {!loading && !error && totalItems > 20 && (
-        <DataTablePagination
-          table={table}
-          disabled={busy}
-          pageSizeOptions={[20]}
+      ) : (
+        <div aria-busy={query.isFetching}>
+          <div className="hidden lg:block">
+            <DataTable
+              table={table}
+              columns={doctorsColumns}
+              bordered={false}
+            />
+          </div>
+          <div className="grid gap-3 p-4 sm:grid-cols-2 lg:hidden">
+            {query.data.data.map((doctor) => (
+              <DoctorCard key={doctor.id} doctor={doctor} />
+            ))}
+          </div>
+        </div>
+      )}
+      {query.data && !query.isError && (
+        <Pagination
+          meta={query.data.meta}
+          page={filters.page}
+          limit={filters.limit}
+          onChange={update}
+          busy={query.isPlaceholderData}
         />
       )}
-    </div>
+    </section>
   );
 }
+
+const DoctorCard = memo(function DoctorCard({ doctor }: { doctor: DoctorRow }) {
+  return (
+    <article className="min-w-0 space-y-4 rounded-xl border p-4">
+      <div className="flex items-start justify-between gap-2">
+        <Link
+          href={`/doctors/${encodeURIComponent(doctor.id)}`}
+          className="flex min-w-0 items-center gap-3 rounded focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          <InitialsAvatar name={doctor.name} />
+          <span className="min-w-0">
+            <span className="block font-semibold break-words">
+              {doctor.name}
+            </span>
+            <span className="block break-all text-xs text-muted-foreground">
+              {doctor.email}
+            </span>
+          </span>
+        </Link>
+        <DoctorRowAction data={doctor} />
+      </div>
+      <ColorBadge>{doctor.specialization}</ColorBadge>
+      <dl className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <dt className="text-xs text-muted-foreground">Hospital</dt>
+          <dd className="mt-1 break-words">{doctor.hospital}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">Phone</dt>
+          <dd className="mt-1 break-words">{doctor.phone}</dd>
+        </div>
+      </dl>
+      <div className="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
+        <span>{doctor.patientCount} patients</span>
+        <span>{formatDate(doctor.createdAt)}</span>
+      </div>
+    </article>
+  );
+});

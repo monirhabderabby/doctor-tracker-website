@@ -1,12 +1,19 @@
 "use client";
 
-import { api } from "@/lib/api";
+import {
+  createDoctor,
+  updateDoctor,
+  fetchDoctorsList,
+} from "@/lib/tracker-api";
+import { queryKeys } from "@/lib/query-keys";
 import { CreateDoctorValues } from "@/schemas/doctors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Doctor extends CreateDoctorValues {
   id: string;
   patientCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DoctorsResponse {
@@ -19,15 +26,11 @@ export function useUpdateDoctor() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["update-doctor"],
-    mutationFn: async ({ id, values }: { id: string; values: CreateDoctorValues }) => {
-      const response = await api.patch<{ success: true; data: Doctor }>(
-        `/doctors/${encodeURIComponent(id)}`,
-        values,
-      );
-      return response.data.data;
-    },
+    mutationFn: updateDoctor,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: doctorsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.patients.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 }
@@ -37,13 +40,9 @@ export const doctorsQueryKey = ["doctors"] as const;
 export function useDoctors(page: number) {
   return useQuery({
     queryKey: [...doctorsQueryKey, { page }],
-    queryFn: async ({ signal }) => {
-      const response = await api.get<DoctorsResponse>("/doctors", {
-        params: { page, limit: 10, sort: "newest" },
-        signal,
-      });
-      return response.data;
-    },
+    queryFn: ({ signal }) =>
+      fetchDoctorsList({ page, limit: 10, sort: "newest" }, signal),
+    staleTime: 30_000,
   });
 }
 
@@ -51,12 +50,10 @@ export function useCreateDoctor() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["create-doctor"],
-    mutationFn: async (values: CreateDoctorValues) => {
-      const response = await api.post<{ success: true; data: Doctor }>("/doctors", values);
-      return response.data.data;
-    },
+    mutationFn: createDoctor,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: doctorsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 }
