@@ -71,9 +71,11 @@ export function PageHeader({
 export const InitialsAvatar = memo(function InitialsAvatar({
   name,
   large = false,
+  compact = false,
 }: {
   name: string;
   large?: boolean;
+  compact?: boolean;
 }) {
   const palette = [
     "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
@@ -90,7 +92,7 @@ export const InitialsAvatar = memo(function InitialsAvatar({
       aria-hidden="true"
       className={cn(
         "flex shrink-0 items-center justify-center rounded-xl font-semibold",
-        large ? "size-20 text-2xl" : "size-10 text-sm",
+        large ? "size-20 text-2xl" : compact ? "size-8 text-xs" : "size-10 text-sm",
         palette[hash % palette.length],
       )}
     >
@@ -417,12 +419,14 @@ export function Pagination({
   limit,
   onChange,
   busy = false,
+  summary,
 }: {
   meta: ListResponse<unknown>["meta"];
   page: number;
   limit: number;
   onChange: (values: { page?: number; limit?: 10 | 20 | 50 }) => void;
   busy?: boolean;
+  summary?: ReactNode;
 }) {
   const pages = Array.from(
     new Set([1, page - 1, page, page + 1, meta.totalPages]),
@@ -433,11 +437,15 @@ export function Pagination({
   return (
     <div className="flex flex-col gap-4 border-t px-5 py-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground" role="status">
-        Showing{" "}
-        <span className="font-medium text-foreground">
-          {start}–{Math.min(page * limit, meta.total)}
-        </span>{" "}
-        of <span className="font-medium text-foreground">{meta.total}</span>
+        {summary ?? (
+          <>
+            Showing{" "}
+            <span className="font-medium text-foreground">
+              {start}–{Math.min(page * limit, meta.total)}
+            </span>{" "}
+            of <span className="font-medium text-foreground">{meta.total}</span>
+          </>
+        )}
       </p>
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex items-center gap-3">

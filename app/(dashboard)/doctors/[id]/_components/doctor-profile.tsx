@@ -69,72 +69,76 @@ export default function DoctorProfile({ id }: { id: string }) {
           {doctor.name}
         </span>
       </nav>
-      <section
-        className="overflow-hidden rounded-xl border bg-card shadow-sm"
-        aria-label="Doctor profile"
-      >
-        <div className="h-20 border-b bg-linear-to-r from-primary/15 via-primary/5 to-transparent" />
-        <div className="p-6">
-          <div className="flex flex-wrap items-start justify-between gap-5">
-            <div className="flex min-w-0 items-center gap-4">
-              <InitialsAvatar name={doctor.name} large />
-              <div className="min-w-0">
-                <h1 className="break-words text-2xl font-semibold tracking-tight">
-                  {doctor.name}
-                </h1>
-                <div className="mt-2">
-                  <ColorBadge>{doctor.specialization}</ColorBadge>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setEditing(true)}>
-                <Pencil className="size-4" />
-                Edit doctor
-              </Button>
-              <Button
-                variant="outline"
-                className="text-destructive hover:text-destructive"
-                onClick={() => setDeleting(true)}
-                aria-label="Delete doctor"
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-          </div>
-          <dl className="mt-7 grid gap-5 border-t pt-6 sm:grid-cols-2 xl:grid-cols-3">
-            {[
-              { icon: Building2, label: "Hospital", value: doctor.hospital },
-              { icon: Phone, label: "Phone", value: doctor.phone },
-              { icon: Mail, label: "Email", value: doctor.email },
-              {
-                icon: Users,
-                label: "Patients under care",
-                value: String(doctor.patientCount),
-              },
-              {
-                icon: CalendarDays,
-                label: "Joined",
-                value: formatDate(doctor.createdAt),
-              },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex min-w-0 gap-3">
-                <Icon
-                  className="mt-1 size-4 shrink-0 text-primary"
-                  aria-hidden="true"
-                />
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section
+          className="order-1 min-w-0 overflow-hidden rounded-xl border bg-card shadow-sm lg:order-2"
+          aria-label="Doctor profile"
+        >
+          <div className="h-20 border-b bg-linear-to-r from-primary/15 via-primary/5 to-transparent" />
+          <div className="p-6">
+            <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="flex min-w-0 items-center gap-4">
+                <InitialsAvatar name={doctor.name} large />
                 <div className="min-w-0">
-                  <dt className="text-xs text-muted-foreground">{label}</dt>
-                  <dd className="mt-1 break-words text-sm font-medium">
-                    {value}
-                  </dd>
+                  <h1 className="break-words text-2xl font-semibold tracking-tight">
+                    {doctor.name}
+                  </h1>
+                  <div className="mt-2">
+                    <ColorBadge>{doctor.specialization}</ColorBadge>
+                  </div>
                 </div>
               </div>
-            ))}
-          </dl>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setEditing(true)}>
+                  <Pencil className="size-4" />
+                  Edit doctor
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setDeleting(true)}
+                  aria-label="Delete doctor"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+            </div>
+            <dl className="mt-7 grid gap-5 border-t pt-6 sm:grid-cols-2 lg:grid-cols-1">
+              {[
+                { icon: Building2, label: "Hospital", value: doctor.hospital },
+                { icon: Phone, label: "Phone", value: doctor.phone },
+                { icon: Mail, label: "Email", value: doctor.email },
+                {
+                  icon: Users,
+                  label: "Patients under care",
+                  value: String(doctor.patientCount),
+                },
+                {
+                  icon: CalendarDays,
+                  label: "Joined",
+                  value: formatDate(doctor.createdAt),
+                },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex min-w-0 gap-3">
+                  <Icon
+                    className="mt-1 size-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0">
+                    <dt className="text-xs text-muted-foreground">{label}</dt>
+                    <dd className="mt-1 break-words text-sm font-medium">
+                      {value}
+                    </dd>
+                  </div>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+        <div className="order-2 min-w-0 lg:order-1">
+          <PatientsList doctorId={id} />
         </div>
-      </section>
-      <PatientsList doctorId={id} />
+      </div>
       {editing && (
         <AddDoctorModal initialData={doctor} open onOpenChange={setEditing} />
       )}

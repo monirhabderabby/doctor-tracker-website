@@ -70,7 +70,7 @@ export default function PatientsList({ doctorId }: { doctorId?: string }) {
       className="overflow-hidden rounded-xl border bg-card shadow-sm"
       aria-label={doctorId ? "Doctor patients" : "Patient directory"}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <div>
           <h2 className="font-semibold">
             {doctorId ? "Patients under care" : "Patient directory"}
@@ -86,7 +86,7 @@ export default function PatientsList({ doctorId }: { doctorId?: string }) {
           Add Patient
         </Button>
       </div>
-      <div className="flex flex-wrap items-end gap-4 p-5">
+      <div className="flex flex-wrap items-end gap-3 px-4 py-3">
         <div className="w-full sm:w-80">
           <SearchInput
             label="Search patients, phone…"
@@ -335,24 +335,24 @@ const PatientRow = memo(function PatientRow({
 }) {
   return (
     <tr className="transition-colors hover:bg-muted/40">
-      <td className="break-words px-4 py-4">
+      <td className="break-words px-3 py-2">
         <div className="flex items-center gap-2">
-          <InitialsAvatar name={patient.name} />
+          <InitialsAvatar name={patient.name} compact />
           <span className="font-semibold">{patient.name}</span>
         </div>
       </td>
-      <td className="px-4 py-4">
-        <p className="mb-1 text-sm tabular-nums">{patient.age} years</p>
+      <td className="px-3 py-2">
+        <p className="text-xs tabular-nums">{patient.age} years</p>
         <GenderBadge gender={patient.gender} />
       </td>
-      <td className="break-words px-4 py-4 text-xs tabular-nums">
+      <td className="break-words px-3 py-2 text-xs tabular-nums">
         {patient.phone}
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 py-2">
         <ColorBadge>{patient.condition}</ColorBadge>
       </td>
       {!doctorId && (
-        <td className="break-words px-4 py-4">
+        <td className="break-words px-3 py-2">
           {patient.doctor ? (
             <Link
               className="rounded hover:text-primary focus-visible:outline-2 focus-visible:outline-ring"
@@ -368,10 +368,10 @@ const PatientRow = memo(function PatientRow({
           )}
         </td>
       )}
-      <td className="px-4 py-4 text-xs text-muted-foreground">
+      <td className="px-3 py-2 text-xs text-muted-foreground">
         {formatDate(patient.createdAt)}
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 py-2">
         <PatientActions patient={patient} doctorId={doctorId} />
       </td>
     </tr>

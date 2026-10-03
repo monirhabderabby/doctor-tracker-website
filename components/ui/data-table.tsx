@@ -48,7 +48,7 @@ export function DataTable<TData, TValue>({
                       style={{
                         width: `${(header.getSize() / table.getTotalSize()) * 100}%`,
                       }}
-                      className="h-12 whitespace-normal px-3 text-xs text-muted-foreground"
+                      className="h-9 whitespace-normal px-3 text-xs text-muted-foreground"
                     >
                       {header.isPlaceholder
                         ? null
@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="px-3 py-4 whitespace-normal break-words"
+                      className="px-3 py-2 whitespace-normal break-words"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

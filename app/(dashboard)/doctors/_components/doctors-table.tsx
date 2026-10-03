@@ -106,22 +106,7 @@ export default function DoctorsTable() {
           onChange={(value) => update({ sort: value as typeof filters.sort })}
           options={sortOptions}
         />
-      </div>
-      {specializations.isError && (
-        <div role="alert" className="px-5 pb-3 text-sm text-destructive">
-          Unable to load specializations.{" "}
-          <Button variant="link" onClick={() => void specializations.refetch()}>
-            Retry
-          </Button>
-        </div>
-      )}
-      <div className="flex items-center justify-between gap-3 px-5 pb-4">
-        <p role="status" className="text-xs text-muted-foreground">
-          {query.isFetching
-            ? "Updating directory…"
-            : `${query.data?.meta.total ?? 0} doctors in your network`}
-        </p>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
           {active && (
             <Button variant="ghost" size="sm" onClick={clear}>
               Clear filters
@@ -132,6 +117,14 @@ export default function DoctorsTable() {
           </span>
         </div>
       </div>
+      {specializations.isError && (
+        <div role="alert" className="px-5 pb-3 text-sm text-destructive">
+          Unable to load specializations.{" "}
+          <Button variant="link" onClick={() => void specializations.refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
       {query.isPending ? (
         <TableSkeleton />
       ) : query.isError ? (
@@ -177,6 +170,11 @@ export default function DoctorsTable() {
           limit={filters.limit}
           onChange={update}
           busy={query.isPlaceholderData}
+          summary={
+            query.isFetching
+              ? "Updating directory…"
+              : `${query.data.meta.total} doctors in your network`
+          }
         />
       )}
     </section>

@@ -32,12 +32,12 @@ export const doctorsColumns: ColumnDef<DoctorRow>[] = [
         href={`/doctors/${encodeURIComponent(row.original.id)}`}
         className="flex items-center gap-2 rounded focus-visible:outline-2 focus-visible:outline-ring"
       >
-        <InitialsAvatar name={row.original.name} />
+        <InitialsAvatar name={row.original.name} compact />
         <span className="min-w-0">
           <span className="block font-semibold hover:text-primary">
             {row.original.name}
           </span>
-          <span className="mt-1 block break-all text-xs text-muted-foreground">
+          <span className="block break-all text-xs text-muted-foreground">
             {row.original.email}
           </span>
         </span>
