@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { authQueryKey, AuthUser } from "@/hooks/use-auth";
-import { api, getApiErrorMessage } from "@/lib/api";
+import { authQueryKey } from "@/hooks/use-auth";
+import { getApiErrorMessage } from "@/lib/api";
+import { login } from "@/lib/auth-api";
 import { loginSchema, LoginSchemaValues } from "@/schemas/auth/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,13 +26,7 @@ export default function LoginForm() {
 
   const mutation = useMutation({
     mutationKey: ["login"],
-    mutationFn: async (values: LoginSchemaValues) => {
-      const response = await api.post<{ success: true; data: AuthUser }>(
-        "/auth/login",
-        values,
-      );
-      return response.data.data;
-    },
+    mutationFn: login,
     onSuccess: (user) => {
       queryClient.setQueryData(authQueryKey, user);
       router.replace("/");
@@ -54,7 +49,9 @@ export default function LoginForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-5 max-w-3xl mx-auto py-5"
+          className="space-y-5 mx-auto py-5"
+          noValidate
+          aria-busy={pending}
         >
           {mutation.isError && (
             <p role="alert" className="text-sm text-destructive">
@@ -73,7 +70,7 @@ export default function LoginForm() {
                     type="email"
                     autoComplete="username"
                     disabled={pending}
-                    className="h-9"
+                    className="h-11 rounded-lg"
                     {...field}
                   />
                 </FormControl>
@@ -96,7 +93,7 @@ export default function LoginForm() {
                       autoComplete="current-password"
                       disabled={pending}
                       {...field}
-                      className="h-9"
+                      className="h-11 rounded-lg"
                     />
                   </FormControl>
 
@@ -106,8 +103,13 @@ export default function LoginForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full h-9" disabled={pending}>
-            Login Now {pending && <Loader2 className="animate-spin" />}
+          <Button
+            type="submit"
+            className="w-full h-11 rounded-lg"
+            disabled={pending}
+          >
+            {pending ? "Signing in…" : "Sign in"}{" "}
+            {pending && <Loader2 className="animate-spin" />}
           </Button>
         </form>
       </Form>
