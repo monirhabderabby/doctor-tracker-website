@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AlertModal from "@/components/ui/custom/alert-modal";
 import {
@@ -9,7 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthUser, useLogout } from "@/hooks/use-auth";
-import { ChevronRight, LayoutDashboard, LogOut, Stethoscope, Users } from "lucide-react";
+import {
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Stethoscope,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -34,21 +41,30 @@ const Sidebar = ({ cu, onNavigationLink }: Props) => {
     <>
       <div className="fixed inset-y-0 left-0 z-50 w-60 border-r bg-background">
         <div className="flex h-full flex-col">
-          <div className="border-b p-4 flex justify-center items-center border-black/30 dark:border-white/20">
-            <div className="relative h-[100px] w-[150px] flex items-center">
-              <Link href="/" onClick={() => onNavigationLink?.(false)} className="text-center text-xl font-semibold">
-                Doctor Tracker
+          <div className="flex h-24 items-center border-b px-5">
+            <div className="flex items-center">
+              <Link
+                href="/"
+                onClick={() => onNavigationLink?.(false)}
+                className="text-base focus-visible:outline-2 focus-visible:outline-ring rounded-lg"
+              >
+                <Logo size={32} />
               </Link>
             </div>
           </div>
 
-          <nav aria-label="Main navigation" className="flex-1 overflow-auto p-3">
+          <nav
+            aria-label="Main navigation"
+            className="flex-1 overflow-auto p-3"
+          >
             <ul className="space-y-2">
               {routes.map((route) => {
                 const Icon = route.icon;
-                const isActive = route.href === "/"
-                  ? pathname === "/"
-                  : pathname === route.href || pathname.startsWith(`${route.href}/`);
+                const isActive =
+                  route.href === "/"
+                    ? pathname === "/"
+                    : pathname === route.href ||
+                      pathname.startsWith(`${route.href}/`);
 
                 return (
                   <li key={route.href}>
@@ -58,8 +74,8 @@ const Sidebar = ({ cu, onNavigationLink }: Props) => {
                       aria-current={isActive ? "page" : undefined}
                       className={`flex items-center gap-3 rounded-md px-3 text-[14px] py-2 ${
                         isActive
-                          ? "bg-primary dark:bg-customYellow-primary/10 text-primary-foreground dark:text-customYellow-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:text-customYellow-primary"
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -74,21 +90,40 @@ const Sidebar = ({ cu, onNavigationLink }: Props) => {
           <div className="border-t p-3 hover:bg-gray-50 dark:hover:bg-white/5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button type="button" aria-label="Open user menu" className="flex items-center justify-between gap-1 w-full cursor-pointer">
+                <button
+                  type="button"
+                  aria-label="Open user menu"
+                  className="flex items-center justify-between gap-1 w-full cursor-pointer"
+                >
                   <span className="flex items-center gap-3 min-w-0">
-                    <Avatar className="h-[35px] w-[35px]">
-                      <AvatarFallback>{cu.name.charAt(0).toUpperCase() || "A"}</AvatarFallback>
+                    <Avatar className="h-8.75 w-8.75">
+                      <AvatarFallback>
+                        {cu.name.charAt(0).toUpperCase() || "A"}
+                      </AvatarFallback>
                     </Avatar>
                     <span className="flex flex-col items-start min-w-0">
-                      <span className="text-[14px] truncate w-36 text-left" title={cu.name}>{cu.name}</span>
-                      <span className="text-[12px] truncate w-36 text-left" title={cu.email}>{cu.email}</span>
+                      <span
+                        className="text-[14px] truncate w-36 text-left"
+                        title={cu.name}
+                      >
+                        {cu.name}
+                      </span>
+                      <span
+                        className="text-[12px] truncate w-36 text-left"
+                        title={cu.email}
+                      >
+                        {cu.email}
+                      </span>
                     </span>
                   </span>
                   <ChevronRight className="shrink-0" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" side="right" className="w-40">
-                <DropdownMenuItem onSelect={() => setOpen(true)} disabled={logout.isPending}>
+                <DropdownMenuItem
+                  onSelect={() => setOpen(true)}
+                  disabled={logout.isPending}
+                >
                   <LogOut /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -98,7 +133,9 @@ const Sidebar = ({ cu, onNavigationLink }: Props) => {
       </div>
       <AlertModal
         isOpen={open}
-        onClose={() => { if (!logout.isPending) setOpen(false); }}
+        onClose={() => {
+          if (!logout.isPending) setOpen(false);
+        }}
         onConfirm={() => logout.mutate()}
         loading={logout.isPending}
         title="Are you sure you want to log out?"

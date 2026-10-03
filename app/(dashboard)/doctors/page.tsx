@@ -1,13 +1,34 @@
-import { Stethoscope } from "lucide-react";
-import EmptySection from "../_components/empty-section";
+import { Button } from "@/components/ui/button";
+import { PageHeader, TableSkeleton } from "@/components/ui/tracker-shared";
+import { Plus } from "lucide-react";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import AddDoctorModal from "./_components/add-doctor-modal";
+import DoctorsTable from "./_components/doctors-table";
 
-const Page = () => {
+export const metadata: Metadata = { title: "Doctors" };
+
+export default function Page() {
   return (
-    <div className="space-y-5 p-5 md:p-0">
-      <h2 className="text-2xl font-semibold">Doctors</h2>
-      <EmptySection title="Doctors List" description="The doctors list will appear here." icon={Stethoscope} />
+    <div className="mx-auto space-y-7">
+      <PageHeader
+        title="Doctors"
+        description="The people at the heart of your care network."
+        action={
+          <AddDoctorModal
+            trigger={
+              <Button className="h-10">
+                <Plus aria-hidden="true" />
+                Add Doctor
+              </Button>
+            }
+          />
+        }
+      />
+
+      <Suspense fallback={<TableSkeleton />}>
+        <DoctorsTable />
+      </Suspense>
     </div>
   );
-};
-
-export default Page;
+}

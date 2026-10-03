@@ -14,8 +14,12 @@ const Topbar = ({ cu }: Props) => {
       <div className="flex items-center gap-3 min-w-0">
         <MobileSidebar cu={cu} />
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold truncate">Doctor Tracker (Dashboard)</h1>
-          <p className="text-sm text-muted-foreground truncate">{cu.name}</p>
+          <p className="text-sm font-semibold truncate">
+            Your care network, connected
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            Welcome back, {cu.name}
+          </p>
         </div>
       </div>
       <ThemeToggle />
