@@ -16,8 +16,8 @@ const AppProvider = ({ children }: Props) => {
   return (
     <>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      <NextTopLoader showSpinner={false} color="#FFC300" />
-      <Toaster richColors />
+      <NextTopLoader showSpinner={false} color="#0d9488" />
+      <Toaster richColors position="top-center" closeButton duration={3000} />
     </>
   );
 };

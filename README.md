@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# Doctor Tracker
 
-## Getting Started
+A responsive care workspace built with Next.js 16, TypeScript, Tailwind, shadcn/ui and TanStack Query. The separate Express backend in `../backend` supplies cookie-authenticated doctor/patient records and analytics.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Install the frontend dependencies:
+
+```sh
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env` from `.env.example` if needed, and configure the existing API URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start the backend using its existing setup, then run:
 
-## Learn More
+```sh
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open http://localhost:3000 and sign in with your backend administrator account. Account creation is managed by the backend; this frontend does not seed users or change backend configuration.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/`: summary cards, registration timeline, patient load by doctor, condition distribution.
+- `/doctors`: doctor directory, URL filters, pagination and create/edit/delete.
+- `/doctors/[id]`: doctor profile and assigned patients.
+- `/patients`: patient directory, create/edit/delete and doctor reassignment.
+- `/login`: responsive sign-in page using the existing auth flow.
 
-## Deploy on Vercel
+## Checks and production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sh
+npx tsc --noEmit
+npm run lint
+npm run build
+npm run start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application reuses Lexend/Raleway through `next/font`, the existing query/theme providers, cookie auth, route proxy and session recovery. All newly added server data requests go through API functions and TanStack Query hooks/options. List filters live in the URL; form validation uses Zod with React Hook Form.
+
+See [IMPLEMENTATION.md](IMPLEMENTATION.md) for phase-wise files, packages, assumptions, verification and the live API manual checklist.
