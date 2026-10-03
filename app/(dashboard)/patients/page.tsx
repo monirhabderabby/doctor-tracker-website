@@ -1,11 +1,20 @@
-import { Users } from "lucide-react";
-import EmptySection from "../_components/empty-section";
+import { PageHeader, TableSkeleton } from "@/components/ui/tracker-shared";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import PatientsList from "./_components/patients-list";
+
+export const metadata: Metadata = { title: "Patients" };
 
 const Page = () => {
   return (
-    <div className="space-y-5 p-5 md:p-0">
-      <h2 className="text-2xl font-semibold">Patients</h2>
-      <EmptySection title="Patients List" description="The patients list will appear here." icon={Users} />
+    <div className="mx-auto  space-y-7">
+      <PageHeader
+        title="Patients"
+        description="Every patient, every care connection, in one place."
+      />
+      <Suspense fallback={<TableSkeleton />}>
+        <PatientsList />
+      </Suspense>
     </div>
   );
 };

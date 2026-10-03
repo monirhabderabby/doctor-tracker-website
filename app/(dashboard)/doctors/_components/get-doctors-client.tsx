@@ -1,27 +1,34 @@
-import { doctorsQueryKey, type DoctorsResponse } from "@/hooks/use-doctors";
-import { api } from "@/lib/api";
-import { queryOptions } from "@tanstack/react-query";
+import { doctorListOptions } from "@/hooks/use-tracker";
+import { fetchDoctorsList } from "@/lib/tracker-api";
+import type { ListFilters } from "@/schemas/filters.schema";
 
-interface DoctorsQueryOptions {
+type DoctorsQueryOptions = Partial<ListFilters> & {
   page: number;
-  query: string;
-}
+  query?: string;
+};
 
 export function doctorsQueryOptions(options: DoctorsQueryOptions) {
-  return queryOptions({
-    queryKey: [...doctorsQueryKey, options.query, options.page],
-    queryFn: ({ signal }) => fetchDoctors(options, signal),
-    retry: false,
+  const { query, ...params } = options;
+  return doctorListOptions({
+    limit: 20,
+    sort: "newest",
+    ...params,
+    search: params.search ?? query ?? "",
   });
 }
 
 export async function fetchDoctors(
-  { page, query }: DoctorsQueryOptions,
+  options: DoctorsQueryOptions,
   signal?: AbortSignal,
-): Promise<DoctorsResponse> {
-  const response = await api.get<DoctorsResponse>("/doctors", {
-    params: { page, limit: 20, search: query.trim() || undefined, sort: "newest" },
+) {
+  const { query, ...params } = options;
+  return fetchDoctorsList(
+    {
+      limit: 20,
+      sort: "newest",
+      ...params,
+      search: params.search ?? query?.trim(),
+    },
     signal,
-  });
-  return response.data;
+  );
 }

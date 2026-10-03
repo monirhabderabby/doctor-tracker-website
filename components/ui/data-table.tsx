@@ -20,16 +20,24 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   table: TableInstance<TData>;
   emptyMessage?: ReactNode;
+  bordered?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   table,
   emptyMessage = "No results.",
+  bordered = true,
 }: DataTableProps<TData, TValue>) {
   return (
     <div>
-      <div className="overflow-hidden rounded-lg border">
-        <Table>
+      <div
+        className={
+          bordered
+            ? "overflow-hidden rounded-lg border"
+            : "overflow-hidden border-y"
+        }
+      >
+        <Table className="table-fixed">
           <TableHeader className="bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -37,7 +45,10 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-10 whitespace-nowrap px-3 text-muted-foreground"
+                      style={{
+                        width: `${(header.getSize() / table.getTotalSize()) * 100}%`,
+                      }}
+                      className="h-12 whitespace-normal px-3 text-xs text-muted-foreground"
                     >
                       {header.isPlaceholder
                         ? null
@@ -59,7 +70,10 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3 py-3">
+                    <TableCell
+                      key={cell.id}
+                      className="px-3 py-4 whitespace-normal break-words"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
